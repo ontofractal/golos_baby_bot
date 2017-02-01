@@ -1,10 +1,12 @@
 const golos = require('golos') // импортируем модуль голоса
-const util = require('util')
+const util = require('util') // это встроенный в node.js модуль
 const Promise = require("bluebird") // импортируем модуль Bluebird -- самую популярную имплементацию Promise
-const _ = require('lodash')
-const accountName = '' // аккаунт пользователя, который запускает бота
-const postingKey = '' // приватный постинг ключ пользователя, который запускает бота
-const accountNameToFollow = 'academy' // аккаунт пользователя за которым следим
+const _ = require('lodash') // как уже понятно, импортируем lodash ^_^
+const accountName = 'ontofractal' // аккаунт пользователя, который запускает бота
+const postingKey = process.env.GOLOS_POSTING_KEY // предпочтительный вариант: используем environment variable для доступа к приватному постинг ключу
+// const postingKey = '5K...' //  альтернативный вариант: вводим приватный ключ прямо в код
+const accountVotesToFollow = ['academy'] // array аккаунтов, голоса которых мы будем повторять
+
 // создаем новый Promise обворачивая golos.api.getDynamicGlobalProperties
 const dynamicGlobalProperties = new Promise((resolve, reject) => {
     golos.api.getDynamicGlobalProperties((err, result) => {
@@ -22,8 +24,28 @@ const pluckBlockHeight = x => x.head_block_number
 // создадим функцию, которая достанет все операции из всех транзакций блока и поместит их в array
 const unnestOps = (blockData) => {
     // метод map создает новый array применяя функцию переданную в первый аргумент к каждому элементу
-    // используем метод flatten модуля lodash для уплощения(?!) вложенных списков
+    // используем метод flatten модуля lodash для извлечения элементов из вложенных списков и помещения в одноуровней список
     return _.flatten(blockData.transactions.map(tx => tx.operations))
+}
+
+const reactToIncomingVotes = (voteData) => {
+    const {voter, author, permlink, weight} = voteData
+    // проверяем входит ли проголосовавший аккаунт в список
+    const isMatchingVoter = accountVotesToFollow.includes(voter)
+    // проверяем не является ли это флагом, т.е. имеет вес ниже 0
+    // если сделать строго больше 0, то голоса не будут сниматься, даже если аккаунт убрал свой голос за пост
+    const isMatchingWeight = weight >= 0
+    if (isMatchingVoter && isMatchingWeight) {
+        golos.broadcast.vote(postingKey, accountName, author, permlink, weight, (err, result) => {
+            if (err) {
+                console.log('===========ПРОИЗОШЛА ОШИБКА, БОТ НЕ ГОЛОСОВАЛ===========')
+                console.log(err)
+            } else {
+                // используем ES2016 template strings, которые позволяют форматировать строки интерполируя expressions с помощью ${}
+                console.log(`@${accountName} проголосовал за пост ${permlink} написанный @${author} c весом ${weight}`)
+            }
+        })
+    }
 }
 
 const selectOpHandler = (op) => {
@@ -31,8 +53,7 @@ const selectOpHandler = (op) => {
     // это, конечно, не паттерн метчинг Elixir или Elm, но все равно сильно помогает улучшить читаемость кода
     const [opType, opData] = op
     if (opType === 'vote') {
-        // используем ES2016 template strings, которые позволяют форматировать строки интерполируя expressions с помощью ${}
-        console.log(`@${opData.voter} проголосовал за пост ${opData.permlink} написанный @${opData.author} c весом ${opData.weight}`)
+        reactToIncomingVotes(opData)
     }
 }
 
