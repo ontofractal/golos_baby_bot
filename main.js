@@ -42,7 +42,7 @@ const reactToIncomingVotes = (voteData) => {
                 console.log(err)
             } else {
                 // используем ES2016 template strings, которые позволяют форматировать строки интерполируя expressions с помощью ${}
-                console.log(`@${accountName} проголосовал за пост ${permlink} написанный @${author} c весом ${weight}`)
+                console.log(`@${accountName} проголосовал за пост ${permlink} написанный @${author} c весом ${weight} копируя голос ${voter}`)
             }
         })
     }

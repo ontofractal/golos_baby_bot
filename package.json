@@ -10,7 +10,7 @@
   "license": "MIT",
   "dependencies": {
     "bluebird": "^3.4.7",
-    "golos": "^0.3.32",
+    "golos": "ontofractal/golosjs",
     "lodash": "^4.17.4",
     "prettyjson": "^1.2.1"
   }
