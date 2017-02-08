@@ -5,7 +5,10 @@ const _ = require('lodash') // как уже понятно, импортиру�
 const accountName = 'ontofractal' // аккаунт пользователя, который запускает бота
 const postingKey = process.env.GOLOS_POSTING_KEY // предпочтительный вариант: используем environment variable для доступа к приватному постинг ключу
 // const postingKey = '5K...' //  альтернативный вариант: вводим приватный ключ прямо в код
-const accountVotesToFollow = ['academy'] // array аккаунтов, голоса которых мы будем повторять
+const accountVotesToFollow = process.env.GOLOS_ACCOUNT_VOTES_TO_FOLLOW.split(',') 
+console.log('===================БОТ ЗАПУЩЕН===================')
+console.log(`Бот будем повторять голоса следующих аккаунтов: ${accountVotesToFollow.join(', ')}`) 
+
 
 // создаем новый Promise обворачивая golos.api.getDynamicGlobalProperties
 const dynamicGlobalProperties = new Promise((resolve, reject) => {
