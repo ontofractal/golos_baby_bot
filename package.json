@@ -12,6 +12,7 @@
     "bluebird": "^3.4.7",
     "golos": "ontofractal/golosjs",
     "lodash": "^4.17.4",
-    "prettyjson": "^1.2.1"
+    "prettyjson": "^1.2.1",
+    "request": "^2.79.0"
   }
 }
